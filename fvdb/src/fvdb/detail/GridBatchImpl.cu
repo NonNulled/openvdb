@@ -1757,6 +1757,50 @@ GridBatchImpl::convolutionOutput(const nanovdb::Coord kernelSize, const nanovdb:
         return detail::ops::dispatchBuildGridForConv<DeviceTag>(*this, kernelSize, stride);
     });
     auto ret = c10::make_intrusive<detail::GridBatchImpl>(std::move(convGridBatchHdl), voxS, voxO);
+    ret->setCoarseTransformFromFineGrid(*this, stride);
+    return ret;
+}
+
+c10::intrusive_ptr<GridBatchImpl>
+GridBatchImpl::generativeTransposeConvolutionOutput(const nanovdb::Coord kernelSize,
+                                                    const nanovdb::Coord stride,
+                                                    const std::optional<JaggedTensor> mask) {
+    c10::DeviceGuard guard(device());
+
+    // TODO: check mask
+    if (mask.has_value()) {
+        // TORCH_CHECK_VALUE(
+        //     mask.value().ldim() == 1,
+        //     "Expected mask to have 1 list dimension, i.e. be a single list of coordinate values, but got",
+        //     mask.value().ldim(),
+        //     "list dimensions");
+        // TORCH_CHECK_VALUE(
+        //     mask.value().ldim() == 1,
+        //     "Expected subdiv_mask to have 1 list dimension, i.e. be a single list of coordinate values, but got",
+        //     mask.value().ldim(),
+        //     "list dimensions");
+        checkDevice(mask.value());
+        // TORCH_CHECK(mask.value().jdata().sizes().size() == 1,
+        //             "subdivision mask must have 1 dimension");
+        // TORCH_CHECK(mask.value().jdata().size(0) == totalVoxels(),
+        //             "subdivision mask must be either empty tensor or have one entry per voxel");
+        TORCH_CHECK(mask.value().scalar_type() == torch::kBool,
+                    "subdivision mask must be a boolean tensor");
+    }
+
+    TORCH_CHECK_VALUE(kernelSize == stride, "kernel_size must be equal with stride in generative transpose convolution.");
+    TORCH_CHECK_VALUE(nanovdb::Coord(0) < kernelSize, "kernel_size must be strictly positive.");
+    TORCH_CHECK_VALUE(nanovdb::Coord(0) < stride, "stride must be strictly positive.");
+    if (batchSize() == 0) {
+        return c10::make_intrusive<detail::GridBatchImpl>(device());
+    }
+    std::vector<nanovdb::Vec3d> voxS, voxO;
+    gridVoxelSizesAndOrigins(voxS, voxO);
+
+    auto convGridBatchHdl = FVDB_DISPATCH_KERNEL_DEVICE(device(), [&]() {
+        return detail::ops::dispatchBuildGridForGenTransposeConv<DeviceTag>(*this, stride, mask);
+    });
+    auto ret = c10::make_intrusive<detail::GridBatchImpl>(std::move(convGridBatchHdl), voxS, voxO);
     // ret->setCoarseTransformFromFineGrid(*baseGrid, stride);
     return ret;
 }

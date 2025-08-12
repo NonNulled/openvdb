@@ -447,6 +447,23 @@ bind_grid_batch(py::module &m) {
                 Returns:
                     conv_grid (GridBatch): A GridBatch representing the convolution of this grid batch.
              )_FVDB_")
+        .def ("generative_transpose_conv_grid",
+              &fvdb::GridBatch::generative_transpose_conv_grid,
+              py::arg("kernel_size"),
+              py::arg("stride"),
+              py::arg("mask") = nullptr,
+              R"_FVDB_(
+                Return a batch of grids representing the (generative) transpose convolution of this batch with a given kernel.
+
+                Args:
+                    kernel_size (int or 3-tuple of ints): The size of the kernel to convolve with.
+                    stride (int or 3-tuple of ints): The stride to use when convolving.
+                    mask (JaggedTensor): A JaggedTensor of shape `[num_grids, -1, stride**3]` of booleans indicating which subvoxels to reserve.
+
+                Returns:
+                    conv_grid (GridBatch): A GridBatch representing the convolution of this grid batch.
+              )_FVDB_"
+             )
         .def("dilated_grid",
              &fvdb::GridBatch::dilated_grid,
              py::arg("dilation"),

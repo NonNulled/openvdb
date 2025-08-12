@@ -700,6 +700,15 @@ GridBatch::conv_grid(Vec3iOrScalar kernel_size, Vec3iOrScalar stride) const {
 }
 
 GridBatch
+GridBatch::generative_transpose_conv_grid(Vec3iOrScalar kernel_size,
+                                          Vec3iOrScalar stride,
+                                          const std::optional<JaggedTensor> mask) const {
+    GridBatch result;
+    result.mImpl = mImpl->generativeTransposeConvolutionOutput(kernel_size.value(), stride.value(), mask);
+    return result;
+}
+
+GridBatch
 GridBatch::dilated_grid(const int dilation) const {
     GridBatch result;
     result.mImpl = mImpl->dilate(dilation);

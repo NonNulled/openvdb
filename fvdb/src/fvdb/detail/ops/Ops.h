@@ -29,6 +29,11 @@ nanovdb::GridHandle<TorchDeviceBuffer> dispatchBuildGridForConv(const GridBatchI
                                                                 const nanovdb::Coord &stride);
 
 template <c10::DeviceType>
+nanovdb::GridHandle<TorchDeviceBuffer> dispatchBuildGridForGenTransposeConv(const GridBatchImpl &baseBatchHdl,
+                                                                            const nanovdb::Coord &stride,
+                                                                            const std::optional<JaggedTensor>& mask);
+
+template <c10::DeviceType>
 nanovdb::GridHandle<TorchDeviceBuffer>
 dispatchBuildGridFromPoints(const JaggedTensor &points,
                             const std::vector<VoxelCoordTransform> &txs);

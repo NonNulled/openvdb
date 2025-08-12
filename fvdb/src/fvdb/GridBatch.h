@@ -595,6 +595,15 @@ struct GridBatch : torch::CustomClassHolder {
     /// @return A GridBatch representing the convolved grid.
     GridBatch conv_grid(Vec3iOrScalar kernel_size, Vec3iOrScalar stride) const;
 
+    /// @brief Generate the grid that is affected by the generative transpose convolution operator.
+    /// @param kernel_size The kernel size of generative transpose convolution
+    /// @param stride The stride of the generative transpose convolution
+    /// @param mask An optional mask of shape [B, -1] specifying which upsampled voxels to reserve
+    /// @return A GridBatch representing the convolved grid.
+    GridBatch generative_transpose_conv_grid(Vec3iOrScalar kernel_size,
+                                             Vec3iOrScalar stride,
+                                             const std::optional<JaggedTensor> mask = std::nullopt) const;
+
     /// @brief Return a batch of grids representing the dilated version of this batch of grids.
     /// @param dilation The dilation factor of the grid batch
     /// @return A GridBatch representing the dilated version of this batch of grids.
