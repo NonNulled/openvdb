@@ -267,7 +267,7 @@ class GridBatch:
         self,
         pool_factor: Vec3iOrScalar,
         data: JaggedTensor,
-        stride: int = 0,
+        stride: Vec3iOrScalar = 0,
         coarse_grid: Optional[GridBatch] = None,
     ) -> tuple[JaggedTensor, GridBatch]: ...
     def neighbor_indexes(self, *args, **kwargs): ...
